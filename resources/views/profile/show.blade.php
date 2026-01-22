@@ -202,8 +202,12 @@
                         <div class="mb-4">
                             <label class="label-minimal">Fakultas</label>
                             <select name="fakultas" class="form-select bg-light border-0 py-3" style="border-radius: 10px;" required>
-                                <option value="Fakultas Teknologi Informasi" {{ $user->fakultas == 'Fakultas Teknologi Informasi' ? 'selected' : '' }}>Fakultas Teknologi Informasi</option>
-                                {{-- Tambahkan opsi lain di sini --}}
+                                <option value="">-- Pilih Fakultas --</option>
+                                @foreach(($list_fakultas ?? []) as $f)
+                                    <option value="{{ $f->nama_fakultas }}" {{ $user->fakultas == $f->nama_fakultas ? 'selected' : '' }}>
+                                        {{ $f->nama_fakultas }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     @endif
@@ -218,3 +222,4 @@
 </div>
 
 @endsection
+  

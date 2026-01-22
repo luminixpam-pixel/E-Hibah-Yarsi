@@ -28,6 +28,6 @@ public function run(): void
     );
 
     // Jalankan Sinkronisasi LDAP
-    $this->call(LdapDosenSeeder::class);
+    //$this->call(LdapDosenSeeder::class);
 }
 }

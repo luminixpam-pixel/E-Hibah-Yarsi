@@ -11,6 +11,15 @@ use App\Http\Controllers\{
     CalendarController, ProposalReviewerController, LaporanKemajuanController,
     ProfileController, DokumenResmiController, AdminDocumentController, TemplateController, LaporanAkhirController
 };
+
+// ✅ TAMBAHAN: Root biar gak 404 saat buka domain .test/
+// Kalau sudah login → ke dashboard, kalau belum → ke login
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+});
+
 // Halaman utama langsung ke login jika belum login
 // --- TARUH DI LUAR (Bisa diakses siapa saja) ---
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -141,6 +150,4 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('/admin/update-role/{id}', [DashboardController::class, 'updateRole'])->name('admin.updateRole');
-
-
 });
