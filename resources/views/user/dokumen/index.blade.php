@@ -62,13 +62,6 @@
         color: #0d47a1;
         transform: translateY(-2px);
     }
-
-    .status-badge {
-        font-size: 10px;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-weight: bold;
-    }
 </style>
 
 <div class="container py-4">
@@ -100,7 +93,7 @@
                 <div class="row align-items-end">
                     <div class="col-md-5 mb-2">
                         <label class="small fw-bold text-muted">Judul Dokumen</label>
-                        <input type="text" name="judul" class="form-control" placeholder="Judul Dokumen" required style="border-radius: 8px;">
+                        <input type="text" name="judul" class="form-control" placeholder="Contoh: Panduan Hibah 2024" required style="border-radius: 8px;">
                     </div>
                     <div class="col-md-4 mb-2">
                         <label class="small fw-bold text-muted">Pilih File (PDF/DOCX)</label>
@@ -132,50 +125,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                   @forelse($docs as $index => $doc)
-    <tr class="{{ !$doc->is_visible ? 'row-hidden' : '' }}">
-        <td class="text-center fw-bold text-muted">{{ $index + 1 }}</td>
-        <td class="text-start">
-            <div class="fw-bold text-dark">{{ $doc->judul }}</div>
-            <small class="text-muted">ID: #DOC-{{ $doc->id }}</small>
-        </td>
-        <td class="text-center">{{ $doc->created_at->translatedFormat('d M Y') }}</td>
+                    @forelse($docs as $index => $doc)
+                        <tr class="{{ !$doc->is_visible ? 'row-hidden' : '' }}">
+                            <td class="text-center fw-bold text-muted">{{ $index + 1 }}</td>
+                            <td class="text-start">
+                                <div class="fw-bold text-dark">{{ $doc->judul }}</div>
+                                <small class="text-muted">ID: #DOC-{{ $doc->id }}</small>
+                            </td>
+                            <td class="text-center">{{ $doc->created_at->translatedFormat('d M Y') }}</td>
 
-        {{-- PERBAIKAN DI SINI: Tutup tag IF untuk kolom status --}}
-        @if(Auth::user()->role === 'admin')
-            <td class="text-center">
-                <span class="badge {{ $doc->is_visible ? 'bg-success' : 'bg-secondary' }}">
-                    {{ $doc->is_visible ? 'Tampil' : 'Sembunyi' }}
-                </span>
-            </td>
-        @endif
+                            @if(Auth::user()->role === 'admin')
+                                <td class="text-center">
+                                    <span class="badge {{ $doc->is_visible ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ $doc->is_visible ? 'Tampil' : 'Sembunyi' }}
+                                    </span>
+                                </td>
+                            @endif
 
-        <td class="text-center">
-            <div class="d-flex justify-content-center gap-2">
-                <a href="{{ route('dokumen.download', $doc->id) }}" class="btn-download-doc shadow-sm">
-                    <i class="bi bi-download"></i> UNDUH
-                </a>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="{{ route('dokumen.download', $doc->id) }}" class="btn-download-doc shadow-sm">
+                                        <i class="bi bi-download"></i> UNDUH
+                                    </a>
 
-                @if(Auth::user()->role === 'admin')
-                    <form action="{{ route('admin.dokumen.toggle', $doc->id) }}" method="POST">
-                        @csrf
-                        @method('PATCH') {{-- Sesuai permintaan Anda sebelumnya menggunakan PATCH --}}
-                        <button type="submit" class="btn btn-sm {{ $doc->is_visible ? 'btn-outline-danger' : 'btn-outline-success' }}"
-                                style="border-radius: 8px;">
-                            <i class="bi {{ $doc->is_visible ? 'bi-eye-slash' : 'bi-eye' }}"></i>
-                        </button>
-                    </form>
-                @endif
-            </div>
-        </td>
-    </tr>
-@empty
-    <tr>
-        <td colspan="{{ Auth::user()->role === 'admin' ? '5' : '4' }}" class="text-center py-5 text-muted fst-italic">
-            Belum ada dokumen yang tersedia.
-        </td>
-    </tr>
-@endforelse
+                                    @if(Auth::user()->role === 'admin')
+                                        <form action="{{ route('admin.dokumen.toggle', $doc->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm {{ $doc->is_visible ? 'btn-outline-danger' : 'btn-outline-success' }}"
+                                                    title="{{ $doc->is_visible ? 'Sembunyikan' : 'Tampilkan' }}"
+                                                    style="border-radius: 8px;">
+                                                <i class="bi {{ $doc->is_visible ? 'bi-eye-slash' : 'bi-eye' }}"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ Auth::user()->role === 'admin' ? '5' : '4' }}" class="text-center py-5 text-muted fst-italic">
+                                Belum ada dokumen yang tersedia.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

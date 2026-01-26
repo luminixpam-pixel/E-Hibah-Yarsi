@@ -10,101 +10,77 @@ use Illuminate\Support\Facades\Storage;
 class AdminDocumentController extends Controller
 {
     /**
-     * Tampilan untuk ADMIN (Kelola Dokumen)
-     * Admin bisa melihat SEMUA dokumen termasuk yang disembunyikan.
+     * Menampilkan halaman dokumen untuk semua role
      */
-    public function index() {
-    $docs = AdminDocument::latest()->get(); // Tanpa filter is_visible
-    return view('admin.dokumen.index', compact('docs'));
+ public function index()
+{
+    // Admin melihat semua, User hanya yang is_visible
+    $docs = (Auth::user()->role === 'admin')
+            ? AdminDocument::latest()->get()
+            : AdminDocument::where('is_visible', true)->latest()->get();
+
+    // Arahkan ke file view yang Anda inginkan (misal di folder user)
+    return view('user.dokumen.index', compact('docs'));
 }
-    /**
-     * Tampilan untuk USER (Daftar Dokumen Penting)
-     * Hanya menampilkan dokumen yang statusnya is_visible = true.
-     */
-    public function userView()
-    {
-        // Filter is_visible = true agar user tidak melihat dokumen yang disembunyikan
-        $docs = AdminDocument::where('is_visible', true)->latest()->get();
-
-        // Mengarah ke view user
-        return view('user.dokumen.index', compact('docs'));
-    }
 
     /**
-     * Proses Simpan Dokumen (ADMIN ONLY)
+     * Simpan dokumen baru (Admin Only)
      */
     public function store(Request $request)
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'file' => 'required|mimes:pdf,doc,docx|max:5120' // Maksimal 5MB
+            'file' => 'required|mimes:pdf,doc,docx|max:5120'
         ]);
 
         if ($request->hasFile('file')) {
-            // Simpan file ke folder storage/app/public/admin_docs
             $path = $request->file('file')->store('admin_docs', 'public');
 
             AdminDocument::create([
                 'judul' => $request->judul,
                 'file_path' => $path,
                 'uploaded_by' => Auth::id(),
-                'is_visible' => true, // Secara default langsung tampil
+                'is_visible' => true,
             ]);
 
             return back()->with('success', 'Dokumen berhasil dipublikasikan!');
         }
-
         return back()->with('error', 'Gagal mengunggah file.');
     }
 
     /**
-     * Toggle Sembunyikan/Tampilkan (ADMIN ONLY)
-     * Ini TIDAK MENGHAPUS data, hanya mengubah status 0 atau 1.
+     * Sembunyikan atau Tampilkan dokumen (Admin Only)
      */
-   public function toggleVisibility($id)
-{
-    $doc = AdminDocument::findOrFail($id);
-    $doc->is_visible = !$doc->is_visible;
-    $doc->save();
+    public function toggleVisibility($id)
+    {
+        $doc = AdminDocument::findOrFail($id);
+        $doc->is_visible = !$doc->is_visible;
+        $doc->save();
 
-    $status = $doc->is_visible ? 'ditampilkan' : 'disembunyikan';
+        $status = $doc->is_visible ? 'ditampilkan' : 'disembunyikan';
 
-    // Kembali ke halaman admin agar admin tetap bisa melihat data yang baru saja disembunyikan
-    return redirect()->route('admin.dokumen.index')->with('success', "Dokumen berhasil $status.");
-}
+        // Tetap di halaman yang sama agar data tidak hilang dari layar admin
+        return back()->with('success', "Dokumen '{$doc->judul}' berhasil $status.");
+    }
 
     /**
-     * Proses Download untuk Admin & User
+     * Proses Download
      */
     public function download($id)
     {
         $doc = AdminDocument::findOrFail($id);
 
-        // Cek fisik file di storage
+        // Keamanan: Cegah user biasa unduh file yang sedang disembunyikan via URL
+        if (Auth::user()->role !== 'admin' && !$doc->is_visible) {
+            abort(403);
+        }
+
         if (!Storage::disk('public')->exists($doc->file_path)) {
-            return back()->with('error', 'File fisik tidak ditemukan di server.');
+            return back()->with('error', 'Berkas fisik tidak ditemukan.');
         }
 
-        return Storage::disk('public')->download($doc->file_path, $doc->judul . '.' . pathinfo($doc->file_path, PATHINFO_EXTENSION));
+        $ext = pathinfo($doc->file_path, PATHINFO_EXTENSION);
+        return Storage::disk('public')->download($doc->file_path, $doc->judul . '.' . $ext);
     }
-
-    /**
-     * Tambahan: Hapus Dokumen Permanen (ADMIN ONLY)
-     * Jika admin benar-benar ingin menghapus data dan file fisiknya.
-     */
-    public function destroy($id)
-    {
-        $doc = AdminDocument::findOrFail($id);
-
-        // Hapus file fisik dari storage agar tidak memenuhi server
-        if (Storage::disk('public')->exists($doc->file_path)) {
-            Storage::disk('public')->delete($doc->file_path);
-        }
-
-        $doc->delete();
-
-        return back()->with('success', 'Dokumen berhasil dihapus secara permanen.');
-    }
-
 
 }

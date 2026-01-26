@@ -529,7 +529,7 @@
             <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2 text-primary"></i>Pusat Bantuan</h6>
             <p class="small text-muted mb-4">Butuh panduan pengisian? Unduh dokumen petunjuk teknis di bawah ini atau hubungi admin fakultas.</p>
             <div class="d-grid mt-auto">
-                <a href="{{ route('dokumen.user') }}" class="btn btn-primary btn-sm rounded-pill shadow-sm">
+               <a href="{{ route('dokumen.index') }}" class="btn btn-primary btn-sm rounded-pill shadow-sm">
                     <i class="bi bi-download me-2"></i>Unduh Panduan Layanan
                 </a>
             </div>

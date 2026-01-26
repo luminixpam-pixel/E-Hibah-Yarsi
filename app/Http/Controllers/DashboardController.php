@@ -105,30 +105,31 @@ class DashboardController extends Controller
     /**
      * Menampilkan Riwayat Dosen (Khusus Admin)
      */
-    public function riwayatDosen(Request $request)
-    {
-        $search = $request->get('search');
+   public function riwayatDosen(Request $request)
+{
+    $search = $request->get('search');
 
-        $riwayatDosen = User::where('role', 'pengaju')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('nidn', 'like', "%{$search}%");
-                });
-            })
-            ->withCount([
-                'proposals as total_pengajuan',
-                'proposals as total_disetujui' => function ($query) {
-                    $query->where('status_pendanaan', 'Disetujui');
-                }
-            ])
-            ->withSum(['proposals as total_dana' => function ($query) {
+    $riwayatDosen = User::whereIn('role', ['pengaju', 'reviewer']) // Menampilkan keduanya
+        ->when($search, function ($query) use ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nidn', 'like', "%{$search}%");
+            });
+        })
+        ->withCount([
+            'proposals as total_pengajuan',
+            'proposals as total_disetujui' => function ($query) {
+                // Pastikan string 'Disetujui' sesuai dengan enum di database Anda
                 $query->where('status_pendanaan', 'Disetujui');
-            }], 'biaya')
-            ->get();
+            }
+        ])
+        ->withSum(['proposals as total_dana' => function ($query) {
+            $query->where('status_pendanaan', 'Disetujui');
+        }], 'biaya') // 'biaya' adalah kolom nominal uang di tabel proposals
+        ->get();
 
-        return view('admin.riwayat_dosen', compact('riwayatDosen'));
-    }
+    return view('admin.riwayat_dosen', compact('riwayatDosen'));
+}
 
     /**
      * DETAIL RIWAYAT DOSEN (Khusus Admin)

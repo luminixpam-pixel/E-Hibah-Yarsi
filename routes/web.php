@@ -69,9 +69,16 @@ Route::controller(ProposalController::class)->group(function () {
     Route::post('/laporan-akhir/store', [LaporanAkhirController::class, 'store'])->name('laporan.akhir.store');
     Route::get('/laporan-akhir/download/{id}', [LaporanAkhirController::class, 'download'])->name('laporan.akhir.download');
 
-    // Dokumen (User View & Download)
-    Route::get('/dokumen', [AdminDocumentController::class, 'userView'])->name('dokumen.user');
-    Route::get('/dokumen/download/{id}', [AdminDocumentController::class, 'download'])->name('dokumen.download');
+  // Rute untuk melihat halaman (Admin, Pengaju, Reviewer)
+Route::get('/dokumen', [AdminDocumentController::class, 'index'])->name('dokumen.index');
+Route::get('/dokumen/download/{id}', [AdminDocumentController::class, 'download'])->name('dokumen.download');
+
+// Rute khusus aksi Admin (Upload, Toggle Status, Hapus)
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/admin/dokumen/store', [AdminDocumentController::class, 'store'])->name('admin.dokumen.store');
+    Route::patch('/admin/dokumen/toggle/{id}', [AdminDocumentController::class, 'toggleVisibility'])->name('admin.dokumen.toggle');
+    Route::delete('/admin/dokumen/destroy/{id}', [AdminDocumentController::class, 'destroy'])->name('admin.dokumen.destroy');
+});
 
     // Notifikasi
     Route::controller(NotificationController::class)->group(function () {
