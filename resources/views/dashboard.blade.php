@@ -286,91 +286,93 @@
         </div>
 
         {{-- RINGKASAN ANGKA KUNCI ADMIN --}}
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm p-4 bg-primary text-white h-100 position-relative overflow-hidden">
-                    <div class="position-relative" style="z-index: 2;">
-                        <div class="small fw-bold opacity-75 text-uppercase mb-1">Total Dana Disetujui ({{ $tahun }})</div>
-                        <h3 class="fw-bold mb-0">Rp {{ number_format($ringkasanLaporan['total_dana'] ?? 0, 0, ',', '.') }}</h3>
-                    </div>
-                    <i class="bi bi-cash-stack position-absolute end-0 bottom-0 opacity-25 m-3" style="font-size: 3rem;"></i>
-                </div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 bg-primary text-white h-100 position-relative overflow-hidden">
+            <div class="position-relative" style="z-index: 2;">
+                <div class="small fw-bold opacity-75 text-uppercase mb-1">Total Dana Disetujui ({{ $tahun }})</div>
+                <h3 class="fw-bold mb-0">Rp {{ number_format($ringkasanLaporan['total_dana'] ?? 0, 0, ',', '.') }}</h3>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm p-4 bg-success text-white h-100 position-relative overflow-hidden">
-                    <div class="position-relative" style="z-index: 2;">
-                        <div class="small fw-bold opacity-75 text-uppercase mb-1">Total Penerima Hibah</div>
-                        <h3 class="fw-bold mb-0">{{ number_format($ringkasanLaporan['total_penerima'] ?? 0, 0, ',', '.') }} <span class="fs-6 fw-normal">Proposal</span></h3>
-                    </div>
-                    <i class="bi bi-people position-absolute end-0 bottom-0 opacity-25 m-3" style="font-size: 3rem;"></i>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm p-4 bg-white border h-100 position-relative overflow-hidden">
-                    <div class="position-relative" style="z-index: 2;">
-                        <div class="small fw-bold text-muted text-uppercase mb-1">Total Pengajuan Masuk</div>
-                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($ringkasanLaporan['total_pengajuan'] ?? 0, 0, ',', '.') }}</h3>
-                    </div>
-                    <i class="bi bi-file-earmark-arrow-up position-absolute end-0 bottom-0 text-light m-3" style="font-size: 3rem;"></i>
-                </div>
-            </div>
+            <i class="bi bi-cash-stack position-absolute end-0 bottom-0 opacity-25 m-3" style="font-size: 3rem;"></i>
         </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 bg-success text-white h-100 position-relative overflow-hidden">
+            <div class="position-relative" style="z-index: 2;">
+                <div class="small fw-bold opacity-75 text-uppercase mb-1">Total Penerima Hibah</div>
+                <h3 class="fw-bold mb-0">{{ number_format($ringkasanLaporan['total_penerima'] ?? 0, 0, ',', '.') }} <span class="fs-6 fw-normal">Proposal</span></h3>
+            </div>
+            <i class="bi bi-people position-absolute end-0 bottom-0 opacity-25 m-3" style="font-size: 3rem;"></i>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 bg-warning text-dark h-100 position-relative overflow-hidden">
+            <div class="position-relative" style="z-index: 2;">
+                <div class="small fw-bold opacity-75 text-uppercase mb-1">Total Pengajuan Masuk</div>
+                <h3 class="fw-bold mb-0">{{ number_format($ringkasanLaporan['total_pengajuan'] ?? 0, 0, ',', '.') }} <span class="fs-6 fw-normal">Berkas</span></h3>
+            </div>
+            <i class="bi bi-file-earmark-text position-absolute end-0 bottom-0 opacity-25 m-3" style="font-size: 3rem;"></i>
+        </div>
+    </div>
+</div>
     @endif
 
     {{-- ===================== PROGRESS STEPPER (Pengaju & Reviewer) ==================== --}}
-    @if($role === 'pengaju' || $role === 'reviewer')
-        @php
-            $direvisiDisplay = $direvisiFileCount ?? ($direvisiCount ?? 0);
-            $currentStep = 0;
+   @if($role === 'pengaju' || $role === 'reviewer')
+    @php
+        $direvisiDisplay = $direvisiFileCount ?? ($direvisiCount ?? 0);
+        $currentStep = 0;
 
-            if (($disetujuiCount ?? 0) > 0 || ($direvisiDisplay ?? 0) > 0 || ($hasilRevisiCount ?? 0) > 0 || ($ditolakCount ?? 0) > 0) {
-                $currentStep = 4;
-            } elseif (($reviewSelesaiCount ?? 0) > 0) {
-                $currentStep = 3;
-            } elseif (($perluDireviewCount ?? 0) > 0 || ($sedangDireviewCount ?? 0) > 0) {
-                $currentStep = 2;
-            } elseif (($daftarProposalCount ?? 0) > 0) {
-                $currentStep = 1;
-            }
+        // Logika penentuan step (tetap ada untuk warna garis, tapi angka disembunyikan)
+        if (($disetujuiCount ?? 0) > 0 || ($direvisiDisplay ?? 0) > 0 || ($hasilRevisiCount ?? 0) > 0 || ($ditolakCount ?? 0) > 0) {
+            $currentStep = 4;
+        } elseif (($reviewSelesaiCount ?? 0) > 0) {
+            $currentStep = 3;
+        } elseif (($perluDireviewCount ?? 0) > 0 || ($sedangDireviewCount ?? 0) > 0) {
+            $currentStep = 2;
+        } elseif (($daftarProposalCount ?? 0) > 0) {
+            $currentStep = 1;
+        }
 
-            $labelHeader = $role === 'reviewer' ? 'Status Monitoring Penilaian' : 'Status Progress Pengajuan';
-        @endphp
+        $labelHeader = $role === 'reviewer' ? 'Status Monitoring Penilaian' : 'Status Progress Pengajuan';
 
-        <div class="card p-4 mb-4 shadow-sm border-0">
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <h6 class="mb-1 fw-bold text-dark">{{ $labelHeader }}</h6>
-                    <p class="text-muted small mb-0">Pelacakan tahapan proposal secara real-time.</p>
-                </div>
-                <div class="badge rounded-pill bg-primary px-3 py-2">Tahap {{ $currentStep }} dari 4</div>
-            </div>
+        $steps = ($role === 'reviewer')
+            ? [1 => 'Masuk', 2 => 'Proses', 3 => 'Selesai', 4 => 'Final']
+            : [1 => 'Dikirim', 2 => 'Direview', 3 => 'Keputusan', 4 => 'Selesai'];
+    @endphp
 
-            <div class="stepper position-relative">
-                @php
-                    $steps = ($role === 'reviewer')
-                        ? [1 => 'Masuk', 2 => 'Proses', 3 => 'Selesai', 4 => 'Final']
-                        : [1 => 'Dikirim', 2 => 'Direview', 3 => 'Keputusan', 4 => 'Selesai'];
-                @endphp
-
-                @foreach($steps as $stepNum => $stepText)
-                    @php
-                        $isDone = ($stepNum === 4) ? ($currentStep >= 4) : ($currentStep > $stepNum);
-                        $isActive = $currentStep === $stepNum;
-                        $dotClass = $isDone ? 'done' : ($isActive ? 'active' : 'todo');
-                    @endphp
-                    <div class="step">
-                        <div class="dot {{ $dotClass }}">
-                            @if($isDone) <i class="bi bi-check-lg"></i> @else {{ $stepNum }} @endif
-                        </div>
-                        <div class="label">{{ $stepText }}</div>
-                    </div>
-                    @if($stepNum < 4)
-                        <div class="line {{ $currentStep > $stepNum ? 'filled' : '' }}"></div>
-                    @endif
-                @endforeach
-            </div>
+    <div class="card p-4 mb-4 shadow-sm border-0">
+        <div class="mb-4">
+            <h6 class="mb-1 fw-bold text-dark">{{ $labelHeader }}</h6>
+            <p class="text-muted small mb-0">Pelacakan tahapan proposal secara real-time.</p>
         </div>
-    @endif
+
+        <div class="stepper position-relative">
+            @foreach($steps as $stepNum => $stepText)
+                @php
+                    $isDone = ($stepNum === 4) ? ($currentStep >= 4) : ($currentStep > $stepNum);
+                    $isActive = $currentStep === $stepNum;
+                    $dotClass = $isDone ? 'done' : ($isActive ? 'active' : 'todo');
+                @endphp
+                <div class="step">
+                    <div class="dot {{ $dotClass }}">
+                        @if($isDone)
+                            <i class="bi bi-check-lg"></i>
+                        @else
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                        @endif
+                    </div>
+                    <div class="label">{{ $stepText }}</div>
+                </div>
+                @if($stepNum < 4)
+                    <div class="line {{ $currentStep > $stepNum ? 'filled' : '' }}"></div>
+                @endif
+            @endforeach
+        </div>
+    </div>
+@endif
 
     {{-- ===================== MONITORING CARDS ==================== --}}
 @php
